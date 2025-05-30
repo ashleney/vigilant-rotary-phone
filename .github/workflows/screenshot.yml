@@ -1,0 +1,52 @@
+name: Daily Screenshot
+
+on:
+  schedule:
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Puppeteer
+        run: npm install puppeteer
+
+      - name: Take Screenshot
+        run: |
+          node <<'EOF'
+          const puppeteer = require('puppeteer');
+
+          (async () => {
+            const browser = await puppeteer.launch();
+            const page = await browser.newPage();
+            await page.goto('https://arkprts.ashlen.top/search?nickname=39735282&server=en', {waitUntil: 'networkidle2'});
+
+            const element = await page.$x('/html/body/main/div[2]/div');
+            if (element.length > 0) {
+              await element[0].screenshot({ path: 'screenshot.png' });
+            } else {
+              console.error('Element not found');
+              process.exit(1);
+            }
+
+            await browser.close();
+          })();
+          EOF
+
+      - name: Commit and push screenshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add screenshot.png
+          git commit -m "Update screenshot"
+          git push
