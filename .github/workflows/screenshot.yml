@@ -33,7 +33,7 @@ jobs:
             const page = await browser.newPage();
             await page.goto('https://arkprts.ashlen.top/search?nickname=39735282&server=en', {waitUntil: 'networkidle2'});
 
-            const element = await page.$x('/html/body/main/div[2]/div');
+            const element = await page.waitForXPath('/html/body/main/div[2]/div', {timeout: 5000});
             if (element.length > 0) {
               await element[0].screenshot({ path: 'screenshot.png' });
             } else {
